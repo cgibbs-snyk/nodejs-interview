@@ -1,0 +1,47 @@
+name: Snyk security scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # Gate: runs on every pull request and push.
+  # Fails the build only for high or critical vulnerabilities.
+  snyk-test:
+    name: snyk test (security gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+      - name: Run snyk test
+        run: snyk test --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  # Snapshot: runs only when code lands on main.
+  # Sends results to the Snyk dashboard for ongoing monitoring. Never blocks.
+  snyk-monitor:
+    name: snyk monitor (dashboard snapshot)
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+      - name: Run snyk monitor
+        run: >
+          snyk monitor
+          --project-name=nova-bank/payments-api
+          --project-tags=team=payments
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
