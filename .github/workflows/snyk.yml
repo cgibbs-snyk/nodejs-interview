@@ -1,4 +1,8 @@
-name: Snyk security scan
+name: Nova Bank Payments Security
+run-name: >-
+  ${{ github.event_name == 'pull_request' && 'Nova Bank Payments — Pull request scan' ||
+      github.ref_name == 'main' && 'Nova Bank Payments — Test and monitor' ||
+      'Nova Bank Payments — Branch scan' }}
 
 on:
   pull_request:
