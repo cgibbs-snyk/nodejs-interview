@@ -37,14 +37,9 @@ jobs:
         id: test
         run: |
           status=0
-          results=$(snyk test --severity-threshold=high) || status=$?
-          # Hide the CLI help tips while keeping the scan results and fix advice.
-          printf '%s\n' "$results" | sed -E \
-            -e '/^[[:space:]]*💡 Tip[[:space:]]*$/d' \
-            -e '/^[[:space:]]*You are currently viewing results with --severity-threshold applied\.[[:space:]]*$/d' \
-            -e '/^[[:space:]]*To view all issues, remove the --severity-threshold flag[[:space:]]*$/d' \
-            -e '/^[[:space:]]*To view ignored issues, use the --include-ignores option\.[[:space:]]*$/d'
-          # Exit 1 is a completed scan with findings. Keep the gate red.
+          snyk test --severity-threshold=high || status=$?
+          # Snyk exit codes: 0 = no issues, 1 = issues found (scan completed),
+          # 2 = CLI error, 3 = no supported project. Only 0 or 1 count as a real scan.
           if [[ "$status" == 0 || "$status" == 1 ]]; then
             echo 'scan-completed=true' >> "$GITHUB_OUTPUT"
           fi
