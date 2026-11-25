@@ -65,8 +65,6 @@ jobs:
           snyk monitor
           --project-name=nova-bank/payments-api
           --project-business-criticality=critical
-          --project-environment=frontend
-          --project-lifecycle=production
           --project-tags=team=payments
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
